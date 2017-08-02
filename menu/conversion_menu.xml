@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="conversion_product_conversion_action" model="ir.actions.act_window">
+			<field name="name">Product Conversion</field>
+			<field name="res_model">product.conversion</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem id="conversion_product_conversion_sales_menu" parent="base.menu_product"
+				sequence="2" action="conversion_product_conversion_action"/>
+
+		<menuitem id="conversion_product_conversion_purchases_menu" parent="purchase.menu_procurement_management_product"
+				sequence="2" action="conversion_product_conversion_action"/>
+
+		<menuitem id="conversion_product_conversion_stock_menu" parent="stock.menu_product_in_config_stock"
+				sequence="2" action="conversion_product_conversion_action"/>
+	</data>
+</openerp>

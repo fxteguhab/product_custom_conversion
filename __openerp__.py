@@ -15,6 +15,8 @@
 	'version': '0.1',
 	'depends': ['base'],
 	'data': [
+		'views/conversion_view.xml',
+		'menu/conversion_menu.xml',
 	],
 	'demo': [
 	],
