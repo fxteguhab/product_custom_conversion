@@ -5,7 +5,7 @@
 			<field name="name">Product Conversion</field>
 			<field name="res_model">product.conversion</field>
 			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
+			<field name="view_mode">tree</field>
 		</record>
 
 		<menuitem id="conversion_product_conversion_sales_menu" parent="base.menu_product"

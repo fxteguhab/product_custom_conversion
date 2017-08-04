@@ -9,8 +9,9 @@
 					<group>
 						<field name="product_category_id"/>
 						<field name="product_id"/>
-						<field name="qty"/>
+						<field name="conversion"/>
 						<field name="uom_id"/>
+						<field name="applied_to"/>
 					</group>
 				</form>
 			</field>
@@ -19,11 +20,12 @@
 			<field name="name">>conversion.product.conversion.tree</field>
 			<field name="model">product.conversion</field>
 			<field name="arch" type="xml">
-				<tree>
+				<tree editable='bottom'>
 					<field name="product_category_id" widget="float_time"/>
 					<field name="product_id"/>
-					<field name="qty"/>
+					<field name="conversion"/>
 					<field name="uom_id"/>
+					<field name="applied_to"/>
 				</tree>
 			</field>
 		</record>
