@@ -18,6 +18,7 @@
 		'views/conversion_view.xml',
 		'menu/conversion_menu.xml',
 		'views/product_category_view.xml',
+		'views/product_view.xml',
 	],
 	'demo': [
 	],
