@@ -13,7 +13,7 @@
 	'website': 'http://www.chjs.biz',
 	'category': 'Uncategorized',
 	'version': '0.1',
-	'depends': ['base','product'],
+	'depends': ['base','product', 'stock'],
 	'data': [
 		'views/conversion_view.xml',
 		'menu/conversion_menu.xml',
