@@ -17,6 +17,7 @@
 	'data': [
 		'views/conversion_view.xml',
 		'menu/conversion_menu.xml',
+		'views/product_category_view.xml',
 	],
 	'demo': [
 	],
