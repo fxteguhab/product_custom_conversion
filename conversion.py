@@ -33,16 +33,12 @@ class product_conversion(osv.osv):
 # CONSTRAINTS ---------------------------------------------------------------------------------------------------------------
 	
 	def _check_applied_to_product(self, cr, uid, ids, context=None):
-		users_obj = self.pool.get('res.users')
-		user_branch_id = users_obj.browse(cr, uid, [uid], context).branch_id.id
 		for conversion in self.browse(cr, uid, ids, context):
 			if conversion.applied_to == 'product' and not conversion.product_id:
 				return False
 		return True
 	
 	def _check_applied_to_product_category(self, cr, uid, ids, context=None):
-		users_obj = self.pool.get('res.users')
-		user_branch_id = users_obj.browse(cr, uid, [uid], context).branch_id.id
 		for conversion in self.browse(cr, uid, ids, context):
 			if conversion.applied_to == 'category' and not conversion.product_category_id:
 				return False
@@ -51,4 +47,9 @@ class product_conversion(osv.osv):
 	_constraints = [
 		(_check_applied_to_product, _('You must input field product if you applied to product'), ['applied_to', 'product_id']),
 		(_check_applied_to_product_category, _('You must input field product category if you applied to product category'), ['applied_to', 'product_category_id']),
+	]
+	
+	_sql_constraints = [
+		('unique_product_conversion', 'UNIQUE(product_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product.')),
+		('unique_product_category_conversion', 'UNIQUE(product_category_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product category.')),
 	]
