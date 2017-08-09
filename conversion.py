@@ -53,3 +53,39 @@ class product_conversion(osv.osv):
 		('unique_product_conversion', 'UNIQUE(product_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product.')),
 		('unique_product_category_conversion', 'UNIQUE(product_category_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product category.')),
 	]
+	
+# METHOD --------------------------------------------------------------------------------------------------------------------
+	
+	def get_conversion_qty(self, cr, uid, product_id, uom_id, qty):
+		product_obj = self.pool.get('product.product')
+		product_template_obj = self.pool.get('product.template')
+		product_category_obj = self.pool.get('product.category')
+		# Find conversion uom for product
+		conversion_product_ids = self.search(
+			cr, uid, [('product_id','=',product_id),('uom_id','=',uom_id),('applied_to','=','product')])
+		if len(conversion_product_ids) > 0:
+			return self.browse(cr, uid, conversion_product_ids[0]).conversion # it must be unique, i.e ids conversion_product_ids just contain 1 id
+		else:
+			product = product_obj.browse(cr, uid, product_id)
+			product_temp = product_template_obj.browse(cr, uid, product.product_tmpl_id.id)
+			product_category = product_category_obj.browse(cr, uid, product_temp.categ_id.id)
+			# Find conversion uom for product category if not found in conversion uom for product
+			conversion_product_ids = self.search(
+				cr, uid, [('product_category_id','=',product_category.id),('uom_id','=',uom_id),('applied_to','=','category')])
+			if len(conversion_product_ids) > 0:
+				return self.browse(cr, uid, conversion_product_ids[0]).conversion # it must be unique, i.e ids conversion_product_ids just contain 1 id
+			else:
+				product_uom_obj = self.pool.get('product.uom')
+				product_obj = self.pool.get('product.product')
+				product = product_obj.browse(cr, uid, product_id)
+				uom = product_uom_obj.browse(cr, uid, uom_id)
+				
+				# If UOM Type is reference, or factor_inv value is -1 then raise
+				if product_id and (uom.factor_inv or uom.factor) == -1:
+					raise osv.except_orm(_('Finding conversion error'), _('Product %s do not have UOM conversion for UOM %s' %(product.name, uom.name)))
+				# Find conversion uom on global if not found in conversion uom for product category
+				qty_global =  product_uom_obj._compute_qty(cr, uid, uom_id, qty, product.product_tmpl_id.uom_po_id.id)
+				if qty_global == -1:
+					raise osv.except_orm(_('Finding conversion error'), _('Product %s do not have UOM conversion for UOM %s' %(product.name, uom.name)))
+				else:
+					return qty_global
