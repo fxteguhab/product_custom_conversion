@@ -38,7 +38,7 @@ class purchase_order_line(osv.osv):
 		product_conversion_obj = self.pool.get('product.conversion')
 		for line in purchase_order_lines:
 			try:
-				product_conversion_obj.get_conversion_qty(cr, uid, line.product_id, line.uom_id, line.product_qty)
+				product_conversion_obj.get_conversion_qty(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
 			except:
 				return False
 		return True
