@@ -49,7 +49,7 @@ class purchase_order_line(osv.osv):
 		
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 					
-	def _calculate_nett_price(self, cr, uid, base_price, product_id, uom_id, qty):
+	def _calculate_nett_price_custom_conversion(self, cr, uid, base_price, product_id, uom_id, qty):
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
 		if uom_qty == 0: uom_qty = 1
@@ -76,7 +76,7 @@ class purchase_order_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		price_unit = product.standard_price
 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
-		nett_price = self._calculate_nett_price(cr, uid, price_unit, product_id, uom_id, qty)
+		nett_price = self._calculate_nett_price_custom_conversion(cr, uid, price_unit, product_id, uom_id, qty)
 		subtotal = nett_price * uom_qty
 		if qty == 0 : qty = 1
 		result['value'].update({
@@ -91,7 +91,7 @@ class purchase_order_line(osv.osv):
 	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, product_uom, product_id,context={}):
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, product_uom, product_qty)
-		nett_price = self._calculate_nett_price(cr, uid, price_unit, product_id, product_uom, product_qty)
+		nett_price = self._calculate_nett_price_custom_conversion(cr, uid, price_unit, product_id, product_uom, product_qty)
 		subtotal = nett_price*uom_qty
 		return {
 			'value': {
