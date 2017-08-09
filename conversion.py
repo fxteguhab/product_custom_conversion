@@ -18,7 +18,7 @@ class product_conversion(osv.osv):
 	_columns = {
 		'product_id': fields.many2one('product.template', 'Product', ondelete='cascade'),
 		'product_category_id': fields.many2one('product.category', 'Product Category', ondelete='cascade'),
-		'conversion': fields.float('Qty.', required=True),
+		'conversion': fields.float('Conversion Qty.', required=True),
 		'uom_id': fields.many2one('product.uom', 'UoM', required=True, ondelete='cascade'),
 		'applied_to' :fields.selection(_APPLIED_TO, 'Applied To', required=True,
 			help='Whether this conversion is for product or product category'),
