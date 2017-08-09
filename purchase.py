@@ -33,7 +33,6 @@ class purchase_order_line(osv.osv):
 		
 	# CONSTRAINTS -----------------------------------------------------------------------------------------------------------
 	
-	
 	def _check_uom_conversion(self, cr, uid, ids, context=None):
 		purchase_order_lines = self.browse(cr, uid, ids)
 		product_conversion_obj = self.pool.get('product.conversion')
@@ -45,7 +44,7 @@ class purchase_order_line(osv.osv):
 		return True
 
 	_constraints = [
-		(_check_uom_conversion, _('Purcase Discount is Not Valid.'), ['purchase_discount']),
+		(_check_uom_conversion, _('There are products that have invalid UOM conversion.'), ['product_uom']),
 	]
 		
 	# METHODS ---------------------------------------------------------------------------------------------------------------
@@ -55,8 +54,6 @@ class purchase_order_line(osv.osv):
 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
 		if uom_qty == 0: uom_qty = 1
 		nett_price = base_price / uom_qty * qty
-		# TODO hitung discount dari odoo asli
-		# If discount is not counted on subtotal, but on the base price, then count the discount
 		return nett_price
 			
 # OVERRIDES ---------------------------------------------------------------------------------------------------------------
