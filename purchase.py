@@ -78,8 +78,9 @@ class purchase_order_line(osv.osv):
 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
 		nett_price = self._calculate_nett_price(cr, uid, price_unit, product_id, uom_id, qty)
 		subtotal = nett_price * uom_qty
+		if qty == 0 : qty = 1
 		result['value'].update({
-			'price_unit': product.standard_price,
+			'price_unit': product.standard_price * uom_qty/qty,
 			#'price_unit_nett': nett_price,
 			'price_subtotal': subtotal
 		})
