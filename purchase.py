@@ -6,14 +6,19 @@ import openerp.addons.decimal_precision as dp
 class purchase_order(osv.osv):
 	_inherit = 'purchase.order'
 	
+# OVERRIDES -----------------------------------------------------------------------------------------------------------------
+	
 	def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
 		res = super(purchase_order, self)._prepare_order_line_move(cr, uid,  order, order_line, picking_id, group_id, context=None)
 		data_obj = self.pool.get('ir.model.data')
 		product_conversion_obj = self.pool.get('product.conversion')
 		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
 		for dict in res:
-			dict['product_uom_qty'] = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
+			qty_uom = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
+			dict['product_uom_qty'] = qty_uom
+			dict['product_uos_qty'] = qty_uom
 			dict['product_uom'] = unit_id
+			dict['product_uos'] = unit_id
 		return res
 
 # ===========================================================================================================================
@@ -62,7 +67,7 @@ class purchase_order_line(osv.osv):
 		(_check_uom_conversion, _('There are products that have invalid UOM conversion.'), ['product_uom']),
 	]
 		
-	# METHODS ---------------------------------------------------------------------------------------------------------------
+# METHODS ---------------------------------------------------------------------------------------------------------------
 					
 	def _calculate_nett_price_custom_conversion(self, cr, uid, base_price, product_id, uom_id, qty):
 		product_conversion_obj = self.pool.get('product.conversion')
