@@ -13,11 +13,7 @@
 				<field name="price_unit" position="attributes">
 					<attribute name="on_change">onchange_order_line(product_qty, price_unit, product_uom, product_id)</attribute>
 				</field>
-				<xpath expr="//field[@name='order_line']/tree//field[@name='product_uom_qty']" position="replace">
-					<field name="product_uom_qty"
-							context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
-							on_change=""/>
-				</xpath>
+
 			</field>
 		</record>
 	</data>

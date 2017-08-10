@@ -45,9 +45,10 @@ class sale_order_line(osv.osv):
 		nett_price = self._calculate_nett_price(cr, uid, price_unit, product, uom, qty)
 		subtotal = nett_price * uom_qty
 		if qty == 0 : qty = 1
+		
 		result['value'].update({
 			'price_unit': product_record.list_price * uom_qty/qty,
-			#'price_unit_nett': nett_price,
+			'product_uom': uom,
 			'price_subtotal': subtotal
 		})
 		return result
@@ -68,7 +69,6 @@ class sale_order_line(osv.osv):
 		if qty == 0 : qty = 1
 		result['value'].update({
 			'price_unit': product_record.list_price * uom_qty/qty,
-			#'price_unit_nett': nett_price,
 			'price_subtotal': subtotal
 		})
 		return result
@@ -82,7 +82,6 @@ class sale_order_line(osv.osv):
 		subtotal = nett_price*uom_qty
 		return {
 			'value': {
-				#'price_unit_nett': nett_price,
 				'price_subtotal': subtotal
 			}
 		}
