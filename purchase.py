@@ -3,6 +3,21 @@ from openerp.tools.translate import _
 
 import openerp.addons.decimal_precision as dp
 
+class purchase_order(osv.osv):
+	_inherit = 'purchase.order'
+	
+	def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
+		res = super(purchase_order, self)._prepare_order_line_move(cr, uid,  order, order_line, picking_id, group_id, context=None)
+		data_obj = self.pool.get('ir.model.data')
+		product_conversion_obj = self.pool.get('product.conversion')
+		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
+		for dict in res:
+			dict['product_uom_qty'] = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
+			dict['product_uom'] = unit_id
+		return res
+
+# ===========================================================================================================================
+
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
 		
@@ -24,14 +39,14 @@ class purchase_order_line(osv.osv):
 	# 		res[id] *= (uom_qty / line.product_qty)
 	# 	return res
 	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		#'price_unit_nett': fields.function(_price_unit_nett, method=True, string='Unit Price (Nett)', type='float'),
 		#'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute=dp.get_precision('Account')),
 	}
 		
-	# CONSTRAINTS -----------------------------------------------------------------------------------------------------------
+# CONSTRAINTS -----------------------------------------------------------------------------------------------------------
 	
 	def _check_uom_conversion(self, cr, uid, ids, context=None):
 		purchase_order_lines = self.browse(cr, uid, ids)
@@ -85,8 +100,8 @@ class purchase_order_line(osv.osv):
 			'price_subtotal': subtotal
 		})
 		return result
-		
-	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
+			
+# ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
 	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, product_uom, product_id,context={}):
 		product_conversion_obj = self.pool.get('product.conversion')
