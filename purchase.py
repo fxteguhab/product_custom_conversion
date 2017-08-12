@@ -55,8 +55,13 @@ class purchase_order_line(osv.osv):
 		result = super(purchase_order_line, self).onchange_product_id(
 			cr, uid, ids, pricelist_id, product_id, qty, uom.id, partner_id, date_order, fiscal_position_id,
 			date_planned, name, price_unit, state, context)
+		uom_qty = self._calculate_uom_qty(cr, uid, product_id, uom.id, qty)
+		nett_price = self._calculate_nett_price(cr, uid, price_unit, uom_qty, qty)
+		subtotal = nett_price*uom_qty
 		result['value'].update({
-			'product_uom': uom.id
+			'product_uom': uom.id,
+			'price_unit': nett_price,
+			'price_subtotal': subtotal
 		})
 		return result
 			
