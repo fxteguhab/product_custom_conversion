@@ -8,114 +8,66 @@ class purchase_order(osv.osv):
 	
 # OVERRIDES -----------------------------------------------------------------------------------------------------------------
 	
-	def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
-		res = super(purchase_order, self)._prepare_order_line_move(cr, uid,  order, order_line, picking_id, group_id, context=None)
-		data_obj = self.pool.get('ir.model.data')
-		product_conversion_obj = self.pool.get('product.conversion')
-		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
-		for dict in res:
-			qty_uom = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
-			dict['product_uom_qty'] = qty_uom
-			dict['product_uos_qty'] = qty_uom
-			dict['product_uom'] = unit_id
-			dict['product_uos'] = unit_id
-		return res
+	# def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
+	# 	res = super(purchase_order, self)._prepare_order_line_move(cr, uid,  order, order_line, picking_id, group_id, context=None)
+	# 	data_obj = self.pool.get('ir.model.data')
+	# 	product_conversion_obj = self.pool.get('product.conversion')
+	# 	unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
+	# 	for dict in res:
+	# 		qty_uom = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
+	# 		dict['product_uom_qty'] = qty_uom
+	# 		dict['product_uos_qty'] = qty_uom
+	# 		dict['product_uom'] = unit_id
+	# 		dict['product_uos'] = unit_id
+	# 	return res
 
 # ===========================================================================================================================
 
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
 		
-# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
-	
-	# def _price_unit_nett(self, cr, uid, ids, field_name={}, arg={}, context={}):
-	# 	result = {}
-	# 	lines = self.browse(cr, uid, ids, context=context)
-	# 	for line in lines:
-	# 		result[line.id] = self._calc_line_base_price(cr, uid, line, context=context)
-	# 	return result
-
-	# def _amount_line(self, cr, uid, ids, prop, arg, context=None):
-	# 	res = super(purchase_order_line, self)._amount_line(cr, uid, ids, prop, arg, context)
-	# 	product_conversion_obj = self.pool.get('product.conversion')
-	# 	for id, subtotal in res.iteritems():
-	# 		line = self.browse(cr, uid, [id], context=context)
-	# 		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
-	# 		res[id] *= (uom_qty / line.product_qty)
-	# 	return res
-	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		#'price_unit_nett': fields.function(_price_unit_nett, method=True, string='Unit Price (Nett)', type='float'),
-		#'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute=dp.get_precision('Account')),
+		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True, domain=[('is_auto_create','=',False)]),
 	}
-		
-# CONSTRAINTS -----------------------------------------------------------------------------------------------------------
-	
-	def _check_uom_conversion(self, cr, uid, ids, context=None):
-		purchase_order_lines = self.browse(cr, uid, ids)
-		product_conversion_obj = self.pool.get('product.conversion')
-		for line in purchase_order_lines:
-			try:
-				product_conversion_obj.get_conversion_qty(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
-			except:
-				return False
-		return True
-
-	_constraints = [
-		(_check_uom_conversion, _('There are products that have invalid UOM conversion.'), ['product_uom']),
-	]
-		
+				
 # METHODS ---------------------------------------------------------------------------------------------------------------
-					
-	def _calculate_nett_price_custom_conversion(self, cr, uid, base_price, product_id, uom_id, qty):
-		product_conversion_obj = self.pool.get('product.conversion')
-		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
+	
+	def _calculate_nett_price(self, cr, uid, base_price, uom_qty, qty):
 		if uom_qty == 0: uom_qty = 1
 		nett_price = base_price / uom_qty * qty
 		return nett_price
+		
+	def _calculate_uom_qty(self, cr, uid, product_id, product_uom_id, product_qty):
+		product_uom_obj = self.pool.get('product.uom')
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
+		return product_uom_obj._compute_qty(cr, uid, product_uom_id, product_qty, product.product_tmpl_id.uom_po_id.id)
 			
 # OVERRIDES ---------------------------------------------------------------------------------------------------------------
-		
-	# def _calc_line_base_price(self, cr, uid, line, context=None):
-	# 	base_price = super(purchase_order_line, self)._calc_line_base_price(cr, uid, line, context)
-	#	product_conversion_obj = self.pool.get('product.conversion')
-	# 	qty = product_conversion_obj.get_conversion_qty(cr, uid, line.product_id.id, line.uom_id.uom_id, line.product_qty)
-	# 	base_price = self._calculate_nett_price(cr, uid, line.price_unit, line.product_id, line.uom_id, line.product_qty)
-	# 	return base_price
-		
-	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	
+	def onchange_product_uom(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
 			name=False, price_unit=False, state='draft', context=None):
-		result = super(purchase_order_line, self).onchange_product_id(
-			cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
-			date_planned, name, price_unit, state, context)
-		product_obj = self.pool.get('product.product')
 		product_conversion_obj = self.pool.get('product.conversion')
-		product = product_obj.browse(cr, uid, product_id)
-		price_unit = product.standard_price
-		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, uom_id, qty)
-		nett_price = self._calculate_nett_price_custom_conversion(cr, uid, price_unit, product_id, uom_id, qty)
-		subtotal = nett_price * uom_qty
-		if qty == 0 : qty = 1
+		uom = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, uom_id, qty)
+		result = super(purchase_order_line, self).onchange_product_id(
+			cr, uid, ids, pricelist_id, product_id, qty, uom.id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit, state, context)
 		result['value'].update({
-			'price_unit': product.standard_price * uom_qty/qty,
-			#'price_unit_nett': nett_price,
-			'price_subtotal': subtotal
+			'product_uom': uom.id
 		})
 		return result
 			
 # ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
 	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, product_uom, product_id,context={}):
-		product_conversion_obj = self.pool.get('product.conversion')
-		uom_qty = product_conversion_obj.get_conversion_qty(cr, uid, product_id, product_uom, product_qty)
-		nett_price = self._calculate_nett_price_custom_conversion(cr, uid, price_unit, product_id, product_uom, product_qty)
+		uom_qty = self._calculate_uom_qty(cr, uid, product_id, product_uom, product_qty)
+		nett_price = self._calculate_nett_price(cr, uid, price_unit, uom_qty, product_qty)
 		subtotal = nett_price*uom_qty
 		return {
 			'value': {
-				#'price_unit_nett': nett_price,
 				'price_subtotal': subtotal
 			}
 		}

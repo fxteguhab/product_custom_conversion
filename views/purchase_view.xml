@@ -8,29 +8,26 @@
 				<field name="date_planned" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
-				<field name="product_id" position="attributes">
-					<attribute name="on_change">onchange_product_id(parent.pricelist_id, product_id, product_qty, product_uom,
-						parent.partner_id, parent.date_order, parent.fiscal_position, date_planned, False, False,
-						parent.state, context)</attribute>
-				</field>
-				<field name="taxes_id" position="attributes">
-					<attribute name="invisible">True</attribute>
-				</field>
-				<field name="amount_untaxed" position="attributes">
-					<attribute name="invisible">True</attribute>
-				</field>
-				<field name="amount_tax" position="attributes">
-					<attribute name="invisible">True</attribute>
-				</field>
+				<!--<field name="product_id" position="attributes">-->
+					<!--<attribute name="on_change">onchange_product_id(parent.pricelist_id, product_id, product_qty, product_uom,-->
+						<!--parent.partner_id, parent.date_order, parent.fiscal_position, date_planned, False, False,-->
+						<!--parent.state, context)</attribute>-->
+				<!--</field>-->
+				<!--<field name="taxes_id" position="attributes">-->
+					<!--<attribute name="invisible">True</attribute>-->
+				<!--</field>-->
+				<!--<field name="amount_untaxed" position="attributes">-->
+					<!--<attribute name="invisible">True</attribute>-->
+				<!--</field>-->
+				<!--<field name="amount_tax" position="attributes">-->
+					<!--<attribute name="invisible">True</attribute>-->
+				<!--</field>-->
 				<field name="product_qty" position="attributes">
 					<attribute name="on_change">onchange_order_line(product_qty, price_unit, product_uom, product_id)</attribute>
 				</field>
 				<field name="price_unit" position="attributes">
 					<attribute name="on_change">onchange_order_line(product_qty, price_unit, product_uom, product_id)</attribute>
 				</field>
-				<!--<field name="price_unit" position="after">-->
-					<!--<field name="price_unit_nett" modifiers="{'readonly': True}"/>-->
-				<!--</field>-->
 			</field>
 		</record>
 	</data>

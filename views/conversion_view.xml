@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-		<record id="conversion_product_conversion_form" model="ir.ui.view">
-			<field name="name">conversion.product.conversion.form</field>
-			<field name="model">product.conversion</field>
-			<field name="arch" type="xml">
-				<form>
-					<group>
-						<field name="applied_to"/>
-						<field name="product_category_id" attrs="{'required':[('applied_to','=','category')]}"/>
-						<field name="product_id" attrs="{'required':[('applied_to','=','product')]}"/>
-						<field name="uom_id"/>
-						<field name="conversion"/>
-					</group>
-				</form>
-			</field>
-		</record>
+		<!--<record id="conversion_product_conversion_form" model="ir.ui.view">-->
+			<!--<field name="name">conversion.product.conversion.form</field>-->
+			<!--<field name="model">product.conversion</field>-->
+			<!--<field name="arch" type="xml">-->
+				<!--<form>-->
+					<!--<group>-->
+						<!--<field name="applied_to"/>-->
+						<!--<field name="product_category_id" attrs="{'required':[('applied_to','=','category')]}"/>-->
+						<!--<field name="product_id" attrs="{'required':[('applied_to','=','product')]}"/>-->
+						<!--<field name="uom_id"/>-->
+						<!--<field name="conversion"/>-->
+					<!--</group>-->
+				<!--</form>-->
+			<!--</field>-->
+		<!--</record>-->
 		<record id="conversion_product_conversion_tree" model="ir.ui.view">
 			<field name="name">conversion.product.conversion.tree</field>
 			<field name="model">product.conversion</field>
@@ -24,7 +24,8 @@
 					<field name="applied_to"/>
 					<field name="product_category_id" attrs="{'required':[('applied_to','=','category')]}"/>
 					<field name="product_id" attrs="{'required':[('applied_to','=','product')]}"/>
-					<field name="uom_id"/>
+					<field name="uom_id" on_change="onchange_product_uom(uom_id)"/>
+					<field name="uom_type"/>
 					<field name="conversion"/>
 				</tree>
 			</field>
