@@ -31,7 +31,7 @@ class purchase_order_line(osv.osv):
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
 			name=False, price_unit=False, state='draft', context=None):
 		product_conversion_obj = self.pool.get('product.conversion')
-		uom = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, uom_id, qty)
+		uom = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, uom_id)
 		result = super(purchase_order_line, self).onchange_product_id(
 			cr, uid, ids, pricelist_id, product_id, qty, uom.id, partner_id, date_order, fiscal_position_id,
 			date_planned, name, price_unit, state, context)

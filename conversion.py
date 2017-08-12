@@ -16,7 +16,7 @@ class product_conversion(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'product_id': fields.many2one('product.template', 'Product', ondelete='cascade'),
+		'product_template_id': fields.many2one('product.template', 'Product', ondelete='cascade'),
 		'product_category_id': fields.many2one('product.category', 'Product Category', ondelete='cascade'),
 		'conversion': fields.float('Conversion Qty.', required=True),
 		'uom_id': fields.many2one('product.uom', 'UoM', required=True, ondelete='cascade', domain=[('uom_type','!=','reference'), ('is_auto_create','=',False)]),
@@ -38,7 +38,7 @@ class product_conversion(osv.osv):
 	
 	def _check_applied_to_product(self, cr, uid, ids, context=None):
 		for conversion in self.browse(cr, uid, ids, context):
-			if conversion.applied_to == 'product' and not conversion.product_id:
+			if conversion.applied_to == 'product' and not conversion.product_template_id:
 				return False
 		return True
 	
@@ -49,12 +49,12 @@ class product_conversion(osv.osv):
 		return True
 	
 	_constraints = [
-		(_check_applied_to_product, _('You must input field product if you applied to product'), ['applied_to', 'product_id']),
+		(_check_applied_to_product, _('You must input field product if you applied to product'), ['applied_to', 'product_template_id']),
 		(_check_applied_to_product_category, _('You must input field product category if you applied to product category'), ['applied_to', 'product_category_id']),
 	]
 	
 	_sql_constraints = [
-		('unique_product_conversion', 'UNIQUE(product_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product.')),
+		('unique_product_conversion', 'UNIQUE(product_template_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product.')),
 		('unique_product_category_conversion', 'UNIQUE(product_category_id,uom_id)', _('You cannot assign the same conversion UOM more than once under one product category.')),
 	]
 	
@@ -111,20 +111,20 @@ class product_conversion(osv.osv):
 	
 # METHOD --------------------------------------------------------------------------------------------------------------------
 	
-	def get_conversion_auto_uom(self, cr, uid, product_id, uom_id, qty):
+	def get_conversion_auto_uom(self, cr, uid, product_id, uom_id):
 		product_obj = self.pool.get('product.product')
 		product_template_obj = self.pool.get('product.template')
 		product_category_obj = self.pool.get('product.category')
 		product_uom_obj = self.pool.get('product.uom')
+		product = product_obj.browse(cr, uid, product_id)
+		product_temp = product_template_obj.browse(cr, uid, product.product_tmpl_id.id)
 		# Find conversion uom for product
 		conversion_product_ids = self.search(
-			cr, uid, [('product_id','=',product_id),('uom_id','=',uom_id),('applied_to','=','product')])
+			cr, uid, [('product_template_id','=',product_temp.id),('uom_id','=',uom_id),('applied_to','=','product')])
 		if len(conversion_product_ids) > 0:
 			record_conversion = self.browse(cr, uid, conversion_product_ids[0]) # it must be unique, i.e ids conversion_product_ids just contain 1 id
 			return product_uom_obj.browse(cr, uid, record_conversion.auto_uom_id.id)
 		else:
-			product = product_obj.browse(cr, uid, product_id)
-			product_temp = product_template_obj.browse(cr, uid, product.product_tmpl_id.id)
 			product_category = product_category_obj.browse(cr, uid, product_temp.categ_id.id)
 			# Find conversion uom for product category if not found in conversion uom for product
 			conversion_product_ids = self.search(

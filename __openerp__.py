@@ -15,12 +15,13 @@
 	'version': '0.1',
 	'depends': ["base","product","stock", "sale", "purchase", "sale_stock"],
 	'data': [
-		'views/conversion_view.xml',
 		'menu/conversion_menu.xml',
+		'views/conversion_view.xml',
 		'views/product_category_view.xml',
 		'views/product_view.xml',
 		'views/purchase_view.xml',
 		'views/sale_view.xml',
+		'views/stock_view.xml',
 	],
 	'demo': [
 	],
