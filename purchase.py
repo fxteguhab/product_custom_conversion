@@ -3,26 +3,6 @@ from openerp.tools.translate import _
 
 import openerp.addons.decimal_precision as dp
 
-class purchase_order(osv.osv):
-	_inherit = 'purchase.order'
-	
-# OVERRIDES -----------------------------------------------------------------------------------------------------------------
-	
-	# def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
-	# 	res = super(purchase_order, self)._prepare_order_line_move(cr, uid,  order, order_line, picking_id, group_id, context=None)
-	# 	data_obj = self.pool.get('ir.model.data')
-	# 	product_conversion_obj = self.pool.get('product.conversion')
-	# 	unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
-	# 	for dict in res:
-	# 		qty_uom = product_conversion_obj.get_conversion_qty(cr, uid, dict['product_id'], dict['product_uom'], dict['product_uom_qty'])
-	# 		dict['product_uom_qty'] = qty_uom
-	# 		dict['product_uos_qty'] = qty_uom
-	# 		dict['product_uom'] = unit_id
-	# 		dict['product_uos'] = unit_id
-	# 	return res
-
-# ===========================================================================================================================
-
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
 		
@@ -56,12 +36,11 @@ class purchase_order_line(osv.osv):
 			cr, uid, ids, pricelist_id, product_id, qty, uom.id, partner_id, date_order, fiscal_position_id,
 			date_planned, name, price_unit, state, context)
 		uom_qty = self._calculate_uom_qty(cr, uid, product_id, uom.id, qty)
-		nett_price = self._calculate_nett_price(cr, uid, price_unit, uom_qty, qty)
-		subtotal = nett_price*uom_qty
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
 			'product_uom': uom.id,
-			'price_unit': nett_price,
-			'price_subtotal': subtotal
+			'price_unit': product.standard_price * uom_qty/qty,
 		})
 		return result
 			

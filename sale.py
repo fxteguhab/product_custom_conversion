@@ -4,24 +4,6 @@
 # class sale_order(osv.osv):
 # 	_inherit = 'sale.order'
 #
-# # OVERRIDES -----------------------------------------------------------------------------------------------------------------
-#
-# 	def _prepare_order_line_procurement(self, cr, uid, order, line, group_id=False, context=None):
-# 		res = super(sale_order, self)._prepare_order_line_procurement(cr, uid, order, line, group_id, context)
-# 		data_obj = self.pool.get('ir.model.data')
-# 		product_conversion_obj = self.pool.get('product.conversion')
-# 		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
-# 		qty_uom = product_conversion_obj.get_conversion_qty(cr, uid, res['product_id'], res['product_uom'], res['product_qty'])
-# 		res['product_qty'] = qty_uom
-# 		res['product_uos_qty'] = qty_uom
-# 		res['product_uom'] = unit_id
-# 		res['product_uos'] = unit_id
-# 		return res
-#
-#
-#
-# # ===========================================================================================================================
-#
 # class sale_order_line(osv.osv):
 # 	_inherit = 'sale.order.line'
 #
