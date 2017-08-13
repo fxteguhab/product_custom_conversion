@@ -87,6 +87,14 @@ class product_conversion(osv.osv):
 			product_uom = product_uom_obj.browse(cr, uid, record.uom_id.id)
 			if vals.get('conversion', False):
 				product_uom_obj.write(cr, uid, [record.auto_uom_id.id],{'name' : product_uom.name +'('+ str(vals['conversion']) +')'}, context)
+				if vals.get('uom_type', False) == 'bigger':
+					product_uom_obj.write(cr, uid, [record.auto_uom_id.id],{'factor_inv' : vals['conversion']}, context)
+				else:
+					if record.uom_type == 'bigger':
+						product_uom_obj.write(cr, uid, [record.auto_uom_id.id],{'factor_inv' : vals['conversion']}, context)
+					else:
+						product_uom_obj.write(cr, uid, [record.auto_uom_id.id],{'factor' : vals['conversion']}, context)
+					
 			if vals.get('uom_id', False):
 				try:
 					product_uom_obj.write(cr, uid, [record.auto_uom_id.id],{'category_id' : product_uom.category_id.id}, context)
