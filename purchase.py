@@ -1,7 +1,5 @@
 from openerp.osv import osv, fields
-from openerp.tools.translate import _
 
-import openerp.addons.decimal_precision as dp
 
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
@@ -9,7 +7,7 @@ class purchase_order_line(osv.osv):
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True, domain=[('is_auto_create','=',False)]),
+		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
 	}
 				
 # METHODS ---------------------------------------------------------------------------------------------------------------
@@ -42,7 +40,26 @@ class purchase_order_line(osv.osv):
 			'product_uom': uom.id,
 			'price_unit': product.standard_price * uom_qty/qty,
 		})
+		
+		result = self._update_uom_domain(result)
 		return result
+	
+	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order=False,
+			fiscal_position_id=False, date_planned=False, name=False, price_unit=False, state='draft', context=None):
+		res = super(purchase_order_line, self).onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, context)
+		res = self._update_uom_domain(res)
+		return res
+	
+	def _update_uom_domain(self, onchange_result):
+		if onchange_result.get('domain', False):
+			if onchange_result['domain'].get('product_uom', False):
+				onchange_result['domain']['product_uom'].append(('is_auto_create', '=', False))
+			else:
+				onchange_result['domain']['product_uom'] = [('is_auto_create', '=', False)]
+		else:
+			onchange_result.update({'domain': {'product_uom': [('is_auto_create', '=', False)]}})
+		return onchange_result
 			
 # ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	

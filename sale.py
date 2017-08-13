@@ -7,7 +7,7 @@ class sale_order_line(osv.osv):
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 
 	_columns = {
-		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True, domain=[('is_auto_create','=',False)]),
+		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
 	}
 
 # METHODS ---------------------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ class sale_order_line(osv.osv):
 		uom_record = product_conversion_obj.get_conversion_auto_uom(cursor, user, product, uom)
 		result = super(sale_order_line, self).onchange_product_uom(
 			cursor, user, ids, pricelist, product, qty, uom_record.id, qty_uos, uos, name, partner_id,
-			lang, update_tax, date_order, fiscal_position, context=None)
+			lang, update_tax, date_order, fiscal_position, context)
 		uom_qty = self._calculate_uom_qty(cursor, user, product, uom_record.id, qty)
 		product_obj = self.pool.get('product.product')
 		product_record = product_obj.browse(cursor, user, product)
@@ -40,7 +40,26 @@ class sale_order_line(osv.osv):
 			'product_uom': uom_record.id,
 			'price_unit': product_record.list_price * uom_qty/qty,
 		})
+		result = self._update_uom_domain(result)
 		return result
+	
+	def product_id_change_with_wh(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False, name='',
+			partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False,
+			flag=False, warehouse_id=False, context=None):
+		result = super(sale_order_line, self).product_id_change_with_wh(cr, uid, ids, pricelist, product, qty, uom, qty_uos,
+			uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, context)
+		result = self._update_uom_domain(result)
+		return result
+		
+	def _update_uom_domain(self, onchange_result):
+		if onchange_result.get('domain', False):
+			if onchange_result['domain'].get('product_uom', False):
+				onchange_result['domain']['product_uom'].append(('is_auto_create', '=', False))
+			else:
+				onchange_result['domain']['product_uom'] = [('is_auto_create', '=', False)]
+		else:
+			onchange_result.update({'domain': {'product_uom': [('is_auto_create', '=', False)]}})
+		return onchange_result
 
 # ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
