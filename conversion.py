@@ -144,4 +144,14 @@ class product_conversion(osv.osv):
 				'uom_type': product_uom.uom_type
 			}
 		}
+	
+	def get_uom_from_auto_uom(self, cr, uid, auto_uom_id, context):
+		conversion_ids = self.search(cr, uid, [('auto_uom_id','=', auto_uom_id)])
+		product_uom_obj = self.pool.get('product.uom')
+		if len(conversion_ids) > 0:
+			conversion = self.browse(cr, uid, conversion_ids[0])
+			return product_uom_obj.browse(cr, uid, conversion.uom_id.id)
+		else:
+			return product_uom_obj.browse(cr, uid, auto_uom_id)
+			
 		
