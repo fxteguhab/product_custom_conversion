@@ -20,7 +20,7 @@ class product_template(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'product_conversion_ids': fields.one2many('product.conversion', 'product_id', 'Product Conversion'),
+		'product_conversion_ids': fields.one2many('product.conversion', 'product_template_id', 'Product Conversion'),
 	}
 
 # ==========================================================================================================================
