@@ -26,6 +26,7 @@ class product_conversion(osv.osv):
 			('reference','Reference Unit of Measure for this category'),
 			('smaller','Smaller than the reference Unit of Measure')],'Type', required=1),
 		'auto_uom_id': fields.many2one('product.uom', 'UoM'),
+		'uom_category_filter_id': fields.many2one('product.uom.categ', 'UoM Category', ondelete='restrict'),
 	}
 	
 # DEFAULTS ------------------------------------------------------------------------------------------------------------------
@@ -161,5 +162,21 @@ class product_conversion(osv.osv):
 			return product_uom_obj.browse(cr, uid, conversion.uom_id.id)
 		else:
 			return product_uom_obj.browse(cr, uid, auto_uom_id)
-			
-		
+	
+	def onchange_product_application(self, cr, uid, ids, applied_to, product_category_id, product_template_id):
+		if applied_to and applied_to == 'product' and product_template_id:
+			product_template_obj = self.pool.get('product.template')
+			product_template = product_template_obj.browse(cr, uid, product_template_id)
+			return {
+				'value': {
+					'uom_category_filter_id': product_template.uom_id.category_id.id,
+				}
+			}
+		elif applied_to and applied_to == 'category' and product_category_id:
+			product_category_obj = self.pool.get('product.category')
+			product_category = product_category_obj.browse(cr, uid, product_category_id)
+			return {
+				'value': {
+					'uom_category_filter_id': product_category.default_uom_id.category_id.id,
+				}
+			}

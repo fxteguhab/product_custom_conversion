@@ -22,9 +22,13 @@
 			<field name="arch" type="xml">
 				<tree editable='bottom'>
 					<field name="applied_to"/>
-					<field name="product_category_id" attrs="{'required':[('applied_to','=','category')]}"/>
-					<field name="product_template_id" attrs="{'required':[('applied_to','=','product')]}"/>
-					<field name="uom_id" on_change="onchange_product_uom(uom_id)"/>
+					<field name="product_category_id" attrs="{'required':[('applied_to','=','category')]}"
+							on_change="onchange_product_application(applied_to,product_category_id,product_template_id)"/>
+					<field name="product_template_id" attrs="{'required':[('applied_to','=','product')]}"
+							on_change="onchange_product_application(applied_to,product_category_id,product_template_id)"/>
+					<field name="uom_id" on_change="onchange_product_uom(uom_id)"
+							domain="[('category_id','=', uom_category_filter_id)]"/>
+					<field name="uom_category_filter_id" invisible="1"/>
 					<field name="uom_type"/>
 					<field name="conversion"/>
 				</tree>
