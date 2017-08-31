@@ -36,9 +36,13 @@ class sale_order_line(osv.osv):
 		uom_qty = self._calculate_uom_qty(cursor, user, product, uom_record.id, qty)
 		product_obj = self.pool.get('product.product')
 		product_record = product_obj.browse(cursor, user, product)
+		if qty == 0:
+			raise osv.except_osv(_('Error'), _('Quantity is zero'))
+		else:
+			price_unit = product_record.list_price * uom_qty/qty
 		result['value'].update({
 			'product_uom': uom_record.id,
-			'price_unit': product_record.list_price * uom_qty/qty,
+			'price_unit': price_unit,
 		})
 		result = self._update_uom_domain(result)
 		return result
@@ -85,8 +89,12 @@ class sale_order_line(osv.osv):
 		nett_price = self._calculate_nett_price(cr, uid, price_unit, uom_qty, qty)
 		subtotal = nett_price * uom_qty
 		
+		if qty == 0:
+			raise osv.except_osv(_('Error'), _('Quantity is zero'))
+		else:
+			price_unit = product_record.list_price * uom_qty/qty
 		result['value'].update({
-			'price_unit': product_record.list_price * uom_qty/qty,
+			'price_unit': price_unit,
 			'product_uom': uom,
 			'price_subtotal': subtotal
 		})
