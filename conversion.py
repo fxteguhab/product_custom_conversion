@@ -64,6 +64,33 @@ class product_conversion(osv.osv):
 	def create(self, cr, uid, data, context=None):
 		product_uom_obj = self.pool.get('product.uom')
 		product_uom = product_uom_obj.browse(cr, uid, data['uom_id'])
+
+		name = product_uom.name +'('+ str(data['conversion']) +')'
+		product_uom_id = product_uom_obj.search(cr, uid,[('name','=',name),('is_auto_create','=',True),('active','=',True),('uom_type','=',data['uom_type'])])
+
+		if not (product_uom_id):
+			data_product_uom = {
+				'name' 			: name,
+				'category_id'	: product_uom.category_id.id,
+				'uom_type'		: data['uom_type'],
+				'rounding'		: product_uom.rounding,
+				'active'		: True,
+				'is_auto_create': True,
+				'factor'		: data['conversion'],
+			}
+			if data['uom_type'] == 'bigger':
+				data_product_uom['factor_inv'] = data['conversion']
+			
+			auto_uom_id =  product_uom_obj.create(cr, uid, data_product_uom, context)
+			data['auto_uom_id'] = auto_uom_id
+		else:
+			data['auto_uom_id'] = product_uom_id[0]
+
+		return super(product_conversion, self).create(cr, uid, data, context)	
+	"""
+	def create(self, cr, uid, data, context=None):
+		product_uom_obj = self.pool.get('product.uom')
+		product_uom = product_uom_obj.browse(cr, uid, data['uom_id'])
 		data_product_uom = {
 			'name' 			: product_uom.name +'('+ str(data['conversion']) +')',
 			'category_id'	: product_uom.category_id.id,
@@ -80,7 +107,8 @@ class product_conversion(osv.osv):
 		data['auto_uom_id'] = auto_uom_id
 		
 		return super(product_conversion, self).create(cr, uid, data, context)
-	
+	"""
+
 	def write(self, cr, uid, ids, vals, context={}):
 		product_uom_obj = self.pool.get('product.uom')
 		res = super(product_conversion, self).write(cr, uid, ids, vals, context=context)
@@ -115,7 +143,11 @@ class product_conversion(osv.osv):
 	def unlink(self, cr, uid, ids, context={}):
 		product_uom_obj = self.pool.get('product.uom')
 		for record in self.browse(cr, uid, ids):
-			product_uom_obj.unlink(cr, uid, [record.auto_uom_id.id], context)
+			print "auto_uom_id : "+str(record.auto_uom_id.id)
+			auto_uom_id = record.auto_uom_id.id
+			other_uom_id = self.search(cr,uid,[('auto_uom_id','=',auto_uom_id)])
+			if len(other_uom_id) <= 1:
+				product_uom_obj.unlink(cr, uid, [record.auto_uom_id.id], context)
 		return super(product_conversion, self).unlink(cr, uid, ids, context=context)
 	
 # METHOD --------------------------------------------------------------------------------------------------------------------
